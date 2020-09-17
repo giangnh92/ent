@@ -1,3 +1,7 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package sqlgraph
 
 import (
@@ -14,7 +18,7 @@ import (
 )
 
 func TestGraph_AddE(t *testing.T) {
-	g := &Graph{
+	g := &Schema{
 		Nodes: []*Node{{Type: "user"}, {Type: "pet"}},
 	}
 	err := g.AddE("pets", &EdgeSpec{Rel: O2M}, "user", "pet")
@@ -26,7 +30,7 @@ func TestGraph_AddE(t *testing.T) {
 }
 
 func TestGraph_EvalP(t *testing.T) {
-	g := &Graph{
+	g := &Schema{
 		Nodes: []*Node{
 			{
 				Type: "user",
@@ -106,6 +110,11 @@ func TestGraph_EvalP(t *testing.T) {
 			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")),
 			p:         entql.EQ(entql.F("name"), entql.F("last")),
 			wantQuery: `SELECT * FROM "users" WHERE "name" = "last"`,
+		},
+		{
+			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")),
+			p:         entql.And(entql.FieldNil("name"), entql.FieldNotNil("last")),
+			wantQuery: `SELECT * FROM "users" WHERE "name" IS NULL AND "last" IS NOT NULL`,
 		},
 		{
 			s: sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")).

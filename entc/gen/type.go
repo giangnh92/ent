@@ -761,8 +761,11 @@ func (f Field) MutationReset() string {
 	return name
 }
 
-// IsBool returns true if the field is an bool field.
+// IsBool returns true if the field is a bool field.
 func (f Field) IsBool() bool { return f.Type != nil && f.Type.Type == field.TypeBool }
+
+// IsBytes returns true if the field is a bytes field.
+func (f Field) IsBytes() bool { return f.Type != nil && f.Type.Type == field.TypeBytes }
 
 // IsTime returns true if the field is a timestamp field.
 func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.TypeTime }

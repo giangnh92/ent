@@ -1,3 +1,7 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package entql
 
 import (
@@ -64,9 +68,12 @@ type (
 	// P represents an expression that returns a boolean value depending on its variables.
 	P interface {
 		Expr
-		Or(P) P
-		And(P) P
 		Negate() P
+	}
+
+	// Where is an exported interface to be used by ent-codegen or ent-schema.
+	Where interface {
+		Where(P)
 	}
 )
 
@@ -172,12 +179,30 @@ func FieldEQ(name string, v interface{}) P {
 	}
 }
 
+// NEQ returns a predicate to check if the expressions are not equal.
+func NEQ(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpNEQ,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldNEQ returns a predicate to check if a field is not equivalent to a given value.
 func FieldNEQ(name string, v interface{}) P {
 	return &BinaryExpr{
 		Op: OpNEQ,
 		X:  &Field{Name: name},
 		Y:  &Value{V: v},
+	}
+}
+
+// GT returns a predicate to check if the expression x > than expression y.
+func GT(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpGT,
+		X:  x,
+		Y:  y,
 	}
 }
 
@@ -190,6 +215,15 @@ func FieldGT(name string, v interface{}) P {
 	}
 }
 
+// GTE returns a predicate to check if the expression x >= than expression y.
+func GTE(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpGTE,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldGTE returns a predicate to check if a field is >= than the given value.
 func FieldGTE(name string, v interface{}) P {
 	return &BinaryExpr{
@@ -199,12 +233,30 @@ func FieldGTE(name string, v interface{}) P {
 	}
 }
 
+// LT returns a predicate to check if the expression x < than expression y.
+func LT(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpLT,
+		X:  x,
+		Y:  y,
+	}
+}
+
 // FieldLT returns a predicate to check if a field is < than the given value.
 func FieldLT(name string, v interface{}) P {
 	return &BinaryExpr{
 		Op: OpLT,
 		X:  &Field{Name: name},
 		Y:  &Value{V: v},
+	}
+}
+
+// LTE returns a predicate to check if the expression x <= than expression y.
+func LTE(x, y Expr) P {
+	return &BinaryExpr{
+		Op: OpLTE,
+		X:  x,
+		Y:  y,
 	}
 }
 
@@ -310,29 +362,9 @@ func HasEdgeWith(name string, p ...P) P {
 	}
 }
 
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *BinaryExpr) And(p P) P {
-	return And(e, p)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *BinaryExpr) Or(e1 P) P {
-	return Or(e, e1)
-}
-
 // Negate negates the predicate.
 func (e *BinaryExpr) Negate() P {
 	return Not(e)
-}
-
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *NaryExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *NaryExpr) Or(e1 P) P {
-	return Or(e, e1)
 }
 
 // Negate negates the predicate.
@@ -340,29 +372,9 @@ func (e *NaryExpr) Negate() P {
 	return Not(e)
 }
 
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *UnaryExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *UnaryExpr) Or(e1 P) P {
-	return Or(e, e1)
-}
-
 // Negate negates the predicate.
 func (e *UnaryExpr) Negate() P {
 	return Not(e)
-}
-
-// And returns a composed predicate that represents the logical AND predicate.
-func (e *CallExpr) And(e1 P) P {
-	return And(e, e1)
-}
-
-// Or returns a composed predicate that represents the logical OR predicate.
-func (e *CallExpr) Or(e1 P) P {
-	return Or(e, e1)
 }
 
 // Negate negates the predicate.
